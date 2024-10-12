@@ -74,7 +74,7 @@ async def analyze(request: Request):
             return JSONResponse(
                 content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
         return JSONResponse(
-            content={"success": True, "run": True, "time": str((rank * 10).__round__() + 20), "voiceID": uuid4().hex})
+            content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
 
 
 @app.api_route("/api/v1/response", methods=["POST", "GET"])
