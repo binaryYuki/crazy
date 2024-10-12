@@ -42,7 +42,6 @@ headers = {
     'Content-Type': 'application/json'
 }
 
-
 async def get_openai_response(prompt):
     """
     获取 OpenAI 的回复
@@ -58,11 +57,10 @@ async def get_openai_response(prompt):
         ]
     }
 
-    async with httpx.Client() as client:
+    async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, json=data, timeout=30)
         response.raise_for_status()
-        response_txt = response['choices'][0]['message']['content']
+        response_txt = response.json()["choices"][0]["message"]["content"]
         return response_txt
-
 
 
