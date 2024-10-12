@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from starlette.requests import Request
 from utils.cognitive import cogRanker
 from utils.rank import analyze_text_async, initializeSentimentAnalysis
+from utils.shitGenerator import get_openai_response
 
 dotenv.load_dotenv()
 
@@ -70,6 +71,27 @@ async def analyze(request: Request):
         rank += (bonus / 10) * 3
         return JSONResponse(
             content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
+
+
+@app.api_route("/api/v1/response", methods=["POST", "GET"])
+async def response(request: Request):
+    """
+    Response endpoint
+    :param request:
+    :return:
+    """
+    try:
+        data = await request.json()
+    except Exception as e:
+        return JSONResponse(
+            content={"success": False, "response": "What the hell are u talking about?"})
+    try:
+        data = data["text"]
+    except Exception as e:
+        return JSONResponse(
+            content={"success": False, "response": "What the hell are u talking about?"})
+    response = await get_openai_response(data)
+    return JSONResponse(content={"success": True, "response": response})
 
 
 if __name__ == "__main__":
