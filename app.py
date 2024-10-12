@@ -54,12 +54,14 @@ async def analyze(request: Request):
         # todo: return tts: "What the hell are u talking about?"
         print("Error parsing request")
     data = data["text"]
-    result = await cogRanker(data)
+    result, bonus = await cogRanker(data)
     if not result:
         # todo: not confident and not cognitive
-        print("Error analyzing text")
+        return JSONResponse(
+            content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
     else:
         rank = await analyze_text_async(data)
+        rank += bonus
         return JSONResponse(
             content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
 
@@ -68,3 +70,4 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
+    # command: uvicorn app:app --reload --host 0.0.0.0 --port 8000 --workers 4

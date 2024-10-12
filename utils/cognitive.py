@@ -3,10 +3,14 @@ import httpx
 import dotenv
 
 
+class notSexualEnoughError(Exception):
+    """
+    Not sexual enough
+    """
+    pass
 
 
-
-async def cogRanker(text:str):
+async def cogRanker(text: str) -> tuple:
     """
     Analyze the text with azure cognitive services
     :param text:
@@ -36,13 +40,15 @@ async def cogRanker(text:str):
     print(f"Violence Rate: {violenceRate}")
 
     # 综合评分 计算是否允许进行下一步操作
-    if hateRate > 0.5 or selfHarmRate > 0.5 or sexualRate > 0.5 or violenceRate > 0.5:
-        return False
+    if sexualRate >= 2:
+        return True, sexualRate
+    if hateRate > 0.5 or selfHarmRate > 0.5 or sexualRate < 2 or violenceRate > 0.5:
+        return False, sexualRate
     else:
-        return True
-
+        return True, sexualRate
 
 
 if __name__ == '__main__':
     import asyncio
+
     asyncio.run(cogRanker("I love you"))
