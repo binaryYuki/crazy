@@ -5,17 +5,24 @@ import queue
 import RPi.GPIO as GPIO
 import time
 import requests  # Import requests to send data to an API
+import threading
+import json
 
+GPIO.cleanup()
 GPIO.setmode(GPIO.BCM)  # Use BCM numbering
 button_pin = 18  # GPIO 18
+relay_pin = 17
+led_pin = 27
 
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(led_pin, GPIO.OUT)
+GPIO.setup(relay_pin, GPIO.OUT)
 
 # Set Google Cloud Credentials
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/user/Downloads/tts/broadcast-c6b76-57be70c737f6.json"
 
 # Audio recording parameters
-RATE = 16000
+RATE = 44100
 CHUNK = int(RATE / 10)  # 100ms
 
 class MicrophoneStream:
@@ -53,7 +60,18 @@ class MicrophoneStream:
                 return
             yield chunk
 
-def send_to_api(transcripts):
+def control_led(duration):
+	def turn_on_led():
+		GPIO.output(led_pin, GPIO.HIGH)
+		GPIO.output(relay_pin, GPIO.HIGH)
+		time.sleep(duration)
+		GPIO.output(relay_pin, GPIO.LOW)
+		GPIO.output(led_pin, GPIO.LOW)
+		
+	led_thread = threading.Thread(target=turn_on_led)
+	led_thread.start()
+	
+def get_text_reply(transcripts):
     api_url = 'http://40.81.144.221:8000/api/v1/response' 
     data = {'text': transcripts}
     
@@ -61,10 +79,23 @@ def send_to_api(transcripts):
         response = requests.get(api_url, json=data)
         response.raise_for_status() 
         print(f'Successfully sent to API: {response.json()}')
+        return response.json()
     except requests.exceptions.RequestException as e:
         print(f'Error sending to API: {e}')
 
-
+def get_time_reply(transcripts):
+    api_url = 'http://40.81.144.221:8000/api/v1/analyze' 
+    data = {'text': transcripts}
+    
+    try:
+        response = requests.get(api_url, json=data)
+        response.raise_for_status() 
+        print(f'Successfully sent to API: {response.json()}')
+        return response.json()
+        
+    except requests.exceptions.RequestException as e:
+        print(f'Error sending to API: {e}')
+        
 def transcribe_streaming():
     client = speech.SpeechClient()
     config = speech.RecognitionConfig(
@@ -100,7 +131,30 @@ def transcribe_streaming():
 
             print("Sending data to API...")
             print('this is the data being sent', '. '.join(temp))
-            send_to_api(''.join(temp))  # Send collected transcripts to API
+            text_reply = get_text_reply(''.join(temp))  # Send collected transcripts to API
+            
+            
+            time_reply = get_time_reply(''.join(temp))
+            
+
+            print("espeak -ven-us+f4 -s170 ' " + text_reply['response'] + " ' ")
+            
+            # write the text_reply['response'] to a file
+            with open('response.txt', 'w') as f:
+                f.write(text_reply['response'])
+
+            # say the file with espeak
+            #os.system("espeak -ven-us+f4 -s170 -f response.txt")
+            #print( "echo '" + text_reply['response'] +"' /home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file /home/user/Downloads/tts/welcome.wav")
+            #os.system("echo '" + text_reply['response'] +"' /home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file /home/user/Downloads/tts/welcome.wav")
+            
+            os.system("/home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file welcome.wav --rate 2.0 < /home/user/Downloads/tts/response.txt")
+            control_led(int(time_reply['time']))
+            
+            os.system("aplay welcome.wav")
+            
+            
+            
         else:
             print('Waiting for button press...')
             time.sleep(0.1)  # Short sleep to avoid busy-waiting
