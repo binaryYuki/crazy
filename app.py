@@ -56,6 +56,7 @@ async def analyze(request: Request):
         print("Error parsing request")
     try:
         data = data["text"]
+        print(f"Data: {data}")
     except Exception as e:
         return JSONResponse(
             content={"success": False, "run": False, "time": str(0), "voiceID": uuid4().hex})
@@ -87,6 +88,7 @@ async def response(request: Request):
             content={"success": False, "response": "What the hell are u talking about?"})
     try:
         data = data["text"]
+        print(f"Data: {data}")
     except Exception as e:
         return JSONResponse(
             content={"success": False, "response": "What the hell are u talking about?"})
