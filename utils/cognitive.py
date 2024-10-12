@@ -1,4 +1,9 @@
+import os
 import httpx
+import dotenv
+
+
+
 
 
 async def cogRanker(text:str):
@@ -10,7 +15,7 @@ async def cogRanker(text:str):
     path = "/contentsafety/text:analyze?api-version=2023-10-01"
     url = endpoint + path
     headers = {
-        "Ocp-Apim-Subscription-Key": "a4bd5b0749814cd792f6d171f0adbb59",
+        "Ocp-Apim-Subscription-Key": os.environ.get("AZURE_API_KEY"),
         "Content-Type": "application/json"
     }
     body = {

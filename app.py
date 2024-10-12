@@ -2,10 +2,13 @@ from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import FastAPI
+import dotenv
 from fastapi.responses import JSONResponse
 from starlette.requests import Request
 from utils.cognitive import cogRanker
 from utils.rank import analyze_text_async, initializeSentimentAnalysis
+
+dotenv.load_dotenv()
 
 
 @asynccontextmanager
@@ -57,7 +60,8 @@ async def analyze(request: Request):
         print("Error analyzing text")
     else:
         rank = await analyze_text_async(data)
-        return JSONResponse(content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
+        return JSONResponse(
+            content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
 
 
 if __name__ == "__main__":
