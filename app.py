@@ -73,6 +73,8 @@ async def analyze(request: Request):
         if rank < 0.5:  # minimum rank is 0.5 means it's not sexual enough
             return JSONResponse(
                 content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
+        if rank > 0:
+            rank += 20
         return JSONResponse(
             content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
 
