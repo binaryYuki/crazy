@@ -41,7 +41,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/api/v1/analyze")
+@app.api_route("/api/v1/analyze", methods=["POST", "GET"])
 async def analyze(request: Request):
     """
     Analyze the text with azure cognitive services
