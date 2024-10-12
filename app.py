@@ -53,15 +53,21 @@ async def analyze(request: Request):
     except Exception as e:
         # todo: return tts: "What the hell are u talking about?"
         print("Error parsing request")
-    data = data["text"]
+    try:
+        data = data["text"]
+    except Exception as e:
+        return JSONResponse(
+            content={"success": False, "run": False, "time": str(0), "voiceID": uuid4().hex})
     result, bonus = await cogRanker(data)
+    print(f"Result: {result}, Bonus: {bonus}")
     if not result:
         # todo: not confident and not cognitive
         return JSONResponse(
             content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
     else:
         rank = await analyze_text_async(data)
-        rank += bonus
+        print(f"Rank: {rank}", f"Bonus: {bonus}")
+        rank += (bonus / 10) * 3
         return JSONResponse(
             content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
 

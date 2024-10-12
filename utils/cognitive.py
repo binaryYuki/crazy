@@ -42,7 +42,7 @@ async def cogRanker(text: str) -> tuple:
     # 综合评分 计算是否允许进行下一步操作
     if sexualRate >= 2:
         return True, sexualRate
-    if hateRate > 0.5 or selfHarmRate > 0.5 or sexualRate < 2 or violenceRate > 0.5:
+    if hateRate > 0.5 or selfHarmRate > 0.5 or sexualRate > 0.5 or violenceRate > 0.5:
         return False, sexualRate
     else:
         return True, sexualRate
