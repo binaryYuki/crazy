@@ -1,4 +1,9 @@
+import os
+
 import httpx
+import dotenv
+
+dotenv.load_dotenv()
 
 initialPrompt = """
 Role: Master of the Lift->"抬杠的语言艺术“
@@ -27,7 +32,7 @@ Rememver to response in English and use sexual words if you can
 """
 
 # TODO: The 'openai.base_url' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(base_url="https://freeai.fly.dev/v1")'
-api_key = "sk-H1bezN5PSZCz74MODJJ5UQIpNMGZbWKOisPiNXtWGg39HjrW"
+api_key = os.getenv("OPENAI_API_KEY")
 
 # 确保你已将 OpenAI API 密钥存储在环境变量中
 OPENAI_API_KEY = api_key
