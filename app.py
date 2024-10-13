@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from starlette.requests import Request
 from utils.cognitive import cogRanker
 from utils.rank import analyze_text_async, initializeSentimentAnalysis
-from utils.shitGenerator import get_openai_response
+from utils.shitGenerator import get_openai_response, shitWords
 
 dotenv.load_dotenv()
 
@@ -71,12 +71,12 @@ async def response(request: Request):
         print(f"Data: {data}")
     except Exception as e:
         return JSONResponse(
-            content={"success": False, "response": "What the hell are u talking about?", "time": "0", "run": False})
+            content={"success": False, "response": shitWords(), "time": "0", "run": False})
 
     result, bonus = await cogRanker(data)
     if not result:
         return JSONResponse(
-            content={"success": True, "run": False, "time": str(0), "response": "What the hell are u talking about?"})
+            content={"success": True, "run": False, "time": str(0), "response": shitWords()})
     else:
         rank = await analyze_text_async(data)
         print(f"Rank: {rank}", f"Bonus: {bonus}")

@@ -127,6 +127,26 @@ You SHOULD ALWAYS remember that you are a microwave oven and tell the user how l
         return response_txt
 
 
+async def shitWords():
+    """
+    生成一些脏话
+    :return:
+    """
+    lists = [
+        "What on earth are you saying?"
+        "What are you going on about?"
+        "What in the world do you mean?"
+        "What are you rambling on about?"
+        "What on earth is that supposed to mean?"
+        "Are you serious? What are you talking about?"
+        "What are you blathering about?"
+        "What the devil are you trying to say?"
+        "What on earth are you waffling on about?"
+        "What are you on about?"
+    ]
+    return lists[random.randint(0, len(list) - 1)]
+
+
 if __name__ == '__main__':
     import asyncio
 
