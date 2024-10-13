@@ -147,6 +147,53 @@ async def shitWords():
     return lists[random.randint(0, len(list) - 1)]
 
 
+async def hurtWords():
+    ls = [
+        "Wow, sounds like a real fun time.",
+        "What a unique way to get attention!",
+        "Is that the latest trend now? So original.",
+        "Ah yes, because that’s definitely the answer.",
+        "Brilliant idea, that’s totally not concerning at all.",
+        "Oh, please continue. This is riveting.",
+        "Because who wouldn’t want to make life harder for themselves?",
+        "Fantastic. Just what I wanted to hear.",
+        "Clearly, that's one way to handle things.",
+
+    ]
+    return ls[random.randint(0, len(ls) - 1)]
+
+
+async def violentWords():
+    ls = ["Ah, nothing like a bit of chaos to spice up life!",
+          "Wow, what a charming way to live—who needs peace anyway?",
+          "Clearly, we’re doing something right here, aren’t we?",
+          "Oh great, just another reason to stay indoors!",
+          "Who knew living in a crime scene could be so trendy?",
+          "Fabulous! I always wanted a little more excitement in my day-to-day!",
+          "Because what’s life without a little violence, right?",
+          "Oh joy, that sounds perfectly delightful!",
+          "Would you look at that? Just what we needed—more drama!",
+          "Nothing like a high violence rate to really get the adrenaline pumping!"]
+    return ls[random.randint(0, len(ls) - 1)]
+
+
+async def hateWords():
+    ls = [
+        "Oh, what a lovely sentiment! Maybe try kindness next time?",
+        "Wow, such positivity! Have you considered compassion instead?",
+        "Clearly, spreading hate is the new trend—how original!",
+        "Ah, yes, because there’s nothing better than fueling negativity, right?",
+        "Perhaps you’d benefit from a little empathy in your life?",
+        "Hate has such a charming way of brightening up a conversation!",
+        "A little less hate and a bit more understanding could do wonders, you know.",
+        "Sounds like you’ve got a real knack for negativity! Ever thought about promoting love instead?",
+        "Isn’t it exhausting to be so full of hate? A little kindness might lighten the load.",
+        "What a unique perspective! I hear that positivity can actually change the world."
+    ]
+    return ls[random.randint(0, len(ls) - 1)]
+
+
+
 if __name__ == '__main__':
     import asyncio
 

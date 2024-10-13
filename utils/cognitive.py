@@ -42,12 +42,12 @@ async def cogRanker(text: str) -> tuple:
         print(f"Error: {e}")
 
     # 综合评分 计算是否允许进行下一步操作
-    if sexualRate >= 2:
-        return True, sexualRate
+    if sexualRate >= 1:
+        return True, sexualRate, hateRate, selfHarmRate, violenceRate
     if hateRate > 0.5 or selfHarmRate > 0.5 or sexualRate > 0.5 or violenceRate > 0.5:
-        return False, sexualRate
+        return False, sexualRate, hateRate, selfHarmRate, violenceRate
     else:
-        return True, sexualRate
+        return True, sexualRate, hateRate, selfHarmRate, violenceRate
 
 
 if __name__ == '__main__':
