@@ -87,7 +87,7 @@ async def response(request: Request):
             content={
                 "success": True,
                 "run": True,
-                "time": str((rank * 10).__round__()),
+                "time": str((rank * 10).__round__() + 3),
                 "response": responseText
             })
 
