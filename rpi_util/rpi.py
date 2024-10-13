@@ -25,6 +25,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/user/Downloads/tts/broadca
 RATE = 44100
 CHUNK = int(RATE / 10)  # 100ms
 
+
 class MicrophoneStream:
     def __init__(self, rate, chunk):
         self._rate = rate
@@ -60,42 +61,46 @@ class MicrophoneStream:
                 return
             yield chunk
 
+
 def control_led(duration):
-	def turn_on_led():
-		GPIO.output(led_pin, GPIO.HIGH)
-		GPIO.output(relay_pin, GPIO.HIGH)
-		time.sleep(duration)
-		GPIO.output(relay_pin, GPIO.LOW)
-		GPIO.output(led_pin, GPIO.LOW)
-		
-	led_thread = threading.Thread(target=turn_on_led)
-	led_thread.start()
-	
+    def turn_on_led():
+        GPIO.output(led_pin, GPIO.HIGH)
+        GPIO.output(relay_pin, GPIO.HIGH)
+        time.sleep(duration)
+        GPIO.output(relay_pin, GPIO.LOW)
+        GPIO.output(led_pin, GPIO.LOW)
+
+    led_thread = threading.Thread(target=turn_on_led)
+    led_thread.start()
+
+
 def get_text_reply(transcripts):
-    api_url = 'http://40.81.144.221:8000/api/v1/response' 
+    api_url = 'http://40.81.144.221:8000/api/v1/response'
     data = {'text': transcripts}
-    
+
     try:
         response = requests.get(api_url, json=data)
-        response.raise_for_status() 
+        response.raise_for_status()
         print(f'Successfully sent to API: {response.json()}')
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f'Error sending to API: {e}')
 
+
 def get_time_reply(transcripts):
-    api_url = 'http://40.81.144.221:8000/api/v1/analyze' 
+    api_url = 'http://40.81.144.221:8000/api/v1/analyze'
     data = {'text': transcripts}
-    
+
     try:
         response = requests.get(api_url, json=data)
-        response.raise_for_status() 
+        response.raise_for_status()
         print(f'Successfully sent to API: {response.json()}')
         return response.json()
-        
+
     except requests.exceptions.RequestException as e:
         print(f'Error sending to API: {e}')
-        
+
+
 def transcribe_streaming():
     client = speech.SpeechClient()
     config = speech.RecognitionConfig(
@@ -114,7 +119,8 @@ def transcribe_streaming():
             print("Button pressed. Starting to record...")
 
             with MicrophoneStream(RATE, CHUNK) as stream:
-                requests_gen = (speech.StreamingRecognizeRequest(audio_content=content) for content in stream.generator())
+                requests_gen = (speech.StreamingRecognizeRequest(audio_content=content) for content in
+                                stream.generator())
                 responses = client.streaming_recognize(streaming_config, requests_gen)
 
                 for response in responses:
@@ -132,13 +138,11 @@ def transcribe_streaming():
             print("Sending data to API...")
             print('this is the data being sent', '. '.join(temp))
             text_reply = get_text_reply(''.join(temp))  # Send collected transcripts to API
-            
-            
+
             time_reply = get_time_reply(''.join(temp))
-            
 
             print("espeak -ven-us+f4 -s170 ' " + text_reply['response'] + " ' ")
-            
+
             # write the text_reply['response'] to a file
             with open('response.txt', 'w') as f:
                 f.write(text_reply['response'])
@@ -147,16 +151,18 @@ def transcribe_streaming():
             #os.system("espeak -ven-us+f4 -s170 -f response.txt")
             #print( "echo '" + text_reply['response'] +"' /home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file /home/user/Downloads/tts/welcome.wav")
             #os.system("echo '" + text_reply['response'] +"' /home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file /home/user/Downloads/tts/welcome.wav")
-            
-            os.system("/home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file welcome.wav --rate 2.0 < /home/user/Downloads/tts/response.txt")
+
+            os.system(
+                "/home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file welcome.wav --rate 2.0 < /home/user/Downloads/tts/response.txt")
             control_led(int(time_reply['time']))
-            
+
             os.system("aplay welcome.wav")
-            
-            
-            
+
+
+
         else:
             print('Waiting for button press...')
             time.sleep(0.1)  # Short sleep to avoid busy-waiting
+
 
 transcribe_streaming()
