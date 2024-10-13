@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
@@ -42,39 +43,15 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.api_route("/api/v1/analyze", methods=["POST", "GET"])
-async def analyze(request: Request):
-    """
-    Analyze the text with azure cognitive services
-    :param request: Request
-    :return:
-    """
-    try:
-        data = await request.json()
-    except Exception as e:
-        # todo: return tts: "What the hell are u talking about?"
-        print("Error parsing request")
-    try:
-        data = data["text"]
-        print(f"Data: {data}")
-    except Exception as e:
-        return JSONResponse(
-            content={"success": False, "run": False, "time": str(0), "voiceID": uuid4().hex})
-    result, bonus = await cogRanker(data)
-    print(f"Result: {result}, Bonus: {bonus}")
-    if not result:
-        # todo: not confident and not cognitive
-        return JSONResponse(
-            content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
-    else:
-        rank = await analyze_text_async(data)
-        print(f"Rank: {rank}", f"Bonus: {bonus}")
-        rank += (bonus / 10) * 3
-        if rank < 0.5:  # minimum rank is 0.5 means it's not sexual enough
-            return JSONResponse(
-                content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
-        return JSONResponse(
-            content={"success": True, "run": True, "time": str((rank * 10).__round__()), "voiceID": uuid4().hex})
+"""
+response model:
+{
+    "success": True,
+    "run": True,
+    "time": 30,
+    "response": "I love you"
+}
+"""
 
 
 @app.api_route("/api/v1/response", methods=["POST", "GET"])
@@ -95,12 +72,30 @@ async def response(request: Request):
     except Exception as e:
         return JSONResponse(
             content={"success": False, "response": "What the hell are u talking about?"})
-    response = await get_openai_response(data)
-    return JSONResponse(content={"success": True, "response": response})
+
+    result, bonus = await cogRanker(data)
+    if not result:
+        return JSONResponse(
+            content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
+    else:
+        rank_future = analyze_text_async(data)
+        response_future = get_openai_response(data)
+
+        rank, responseText = await asyncio.gather(rank_future, response_future)
+
+        print(f"Rank: {rank}", f"Bonus: {bonus}")
+        rank += (bonus / 10) * 3
+
+        return JSONResponse(
+            content={
+                "success": True,
+                "run": True,
+                "time": str((rank * 10).__round__()),
+                "response": responseText
+            })
 
 
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
-    # command: uvicorn app:app --reload --host 0.0.0.0 --port 8000 --workers 4
