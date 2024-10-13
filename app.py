@@ -74,7 +74,7 @@ async def response(request: Request):
             content={"success": False, "response": await shitWords(), "time": "0", "run": False})
     if str(data).find("hate") and str(data).find("how") and str(data).find("you"):
         return JSONResponse(
-            content={"success": False, "response": await get_openai_response(data, "60"), "time": "65", "run": True})
+            content={"success": True, "response": await get_openai_response(data, "60"), "time": "65", "run": True})
     result, bonus, hateRate, selfHarmRate, violenceRate = await cogRanker(data)
     if not result:
         return JSONResponse(
