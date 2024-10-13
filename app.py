@@ -72,6 +72,9 @@ async def response(request: Request):
     except Exception as e:
         return JSONResponse(
             content={"success": False, "response": await shitWords(), "time": "0", "run": False})
+    if str(data).find("hate"):
+        return JSONResponse(
+            content={"success": False, "response": await get_openai_response(data, "30"), "time": "30", "run": False})
     result, bonus, hateRate, selfHarmRate, violenceRate = await cogRanker(data)
     if not result:
         return JSONResponse(
