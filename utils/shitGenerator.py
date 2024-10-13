@@ -144,7 +144,7 @@ async def shitWords():
         "What on earth are you waffling on about?"
         "What are you on about?"
     ]
-    return lists[random.randint(0, len(list) - 1)]
+    return lists[random.randint(0, len(lists) - 1)]
 
 
 async def hurtWords():
