@@ -1,4 +1,6 @@
 import os
+import random
+import re
 
 import httpx
 import dotenv
@@ -16,6 +18,28 @@ headers = {
     'Authorization': f'Bearer {OPENAI_API_KEY}',
     'Content-Type': 'application/json'
 }
+
+
+async def randomGen(systemOutput: int) -> str:
+    """
+    生成随机回复
+    :param systemOutput:
+    :return:
+    """
+    response_choices = [
+        f"But fine, I will warm the food for {systemOutput} seconds."
+        f"Alright, I will reheat the meal for {systemOutput} seconds."
+        f"Very well, I will microwave the dish for {systemOutput} seconds."
+        f"Okay then, I will warm it up for {systemOutput} seconds."
+        f"Sure, I will heat the leftovers for {systemOutput} seconds."
+        f"Alrighty, I will put the food in the oven for {systemOutput} seconds."
+        f"Understood, I will heat the food for {systemOutput} seconds."
+        f"No problem, I will warm the food up for {systemOutput} seconds."
+        f"Fine then, I will set the timer for heating the food for {systemOutput} seconds."
+        f"Sure thing, I will heat the meal for {systemOutput} seconds."
+        f"Okay, I will heat the food for {systemOutput} seconds."
+    ]
+    return response_choices[random.randint(0, len(response_choices) - 1)]
 
 
 async def get_openai_response(prompt, systemOutput):
@@ -93,6 +117,13 @@ You SHOULD ALWAYS remember that you are a microwave oven and tell the user how l
                 runtimes = systemOutput
                 response_txt = f"I'm sorry, I cant get you, but i am gonna heat the food for {runtimes} seconds."
                 print(f"Error: {e}")
+            # 尝试在 txt 中匹配一个整数
+            if response_txt:
+                try:
+                    systemOutput = int(re.search(r'\d+', response_txt).group())
+                except Exception as e:
+                    phrase = await randomGen(systemOutput)
+                    response_txt += phrase
         return response_txt
 
 
@@ -100,4 +131,3 @@ if __name__ == '__main__':
     import asyncio
 
     asyncio.run(get_openai_response("I love you", {"time": 30}))
-
