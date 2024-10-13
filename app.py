@@ -65,7 +65,7 @@ async def response(request: Request):
         data = await request.json()
     except Exception as e:
         return JSONResponse(
-            content={"success": False, "response": "What the hell are u talking about?", "time": "0", "run": False})
+            content={"success": False, "response": await shitWords(), "time": "0", "run": False})
     try:
         data = data["text"]
         print(f"Data: {data}")
