@@ -1,6 +1,7 @@
 import os
 import pyaudio
 from google.cloud import speech
+from google.cloud import texttospeech
 import queue
 import RPi.GPIO as GPIO
 import time
@@ -20,6 +21,7 @@ GPIO.setup(relay_pin, GPIO.OUT)
 
 # Set Google Cloud Credentials
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/user/Downloads/tts/broadcast-c6b76-57be70c737f6.json"
+client_tts = texttospeech.TextToSpeechClient()
 
 # Audio recording parameters
 RATE = 44100
@@ -82,19 +84,6 @@ def get_text_reply(transcripts):
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f'Error sending to API: {e}')
-
-def get_time_reply(transcripts):
-    api_url = 'http://40.81.144.221:8000/api/v1/analyze' 
-    data = {'text': transcripts}
-    
-    try:
-        response = requests.get(api_url, json=data)
-        response.raise_for_status() 
-        print(f'Successfully sent to API: {response.json()}')
-        return response.json()
-        
-    except requests.exceptions.RequestException as e:
-        print(f'Error sending to API: {e}')
         
 def transcribe_streaming():
     client = speech.SpeechClient()
@@ -133,9 +122,6 @@ def transcribe_streaming():
             print('this is the data being sent', '. '.join(temp))
             text_reply = get_text_reply(''.join(temp))  # Send collected transcripts to API
             
-            
-            time_reply = get_time_reply(''.join(temp))
-            
 
             print("espeak -ven-us+f4 -s170 ' " + text_reply['response'] + " ' ")
             
@@ -148,10 +134,28 @@ def transcribe_streaming():
             #print( "echo '" + text_reply['response'] +"' /home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file /home/user/Downloads/tts/welcome.wav")
             #os.system("echo '" + text_reply['response'] +"' /home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file /home/user/Downloads/tts/welcome.wav")
             
-            os.system("/home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file welcome.wav --rate 2.0 < /home/user/Downloads/tts/response.txt")
-            control_led(int(time_reply['time']))
+            synthesis_in = texttospeech.SynthesisInput(text=text_reply['response'])
             
-            os.system("aplay welcome.wav")
+            voice = texttospeech.VoiceSelectionParams(
+				language_code="en-GB",
+				name="en-GB-Standard-F",
+				ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
+			)
+			
+            audio_config = texttospeech.AudioConfig(audio_encoding=texttospeech.AudioEncoding.MP3)
+			
+            audio_response = client_tts.synthesize_speech(input=synthesis_in, voice=voice, audio_config=audio_config)
+			
+            with open("output.mp3", "wb") as out:
+				# Write the response to the output file.
+                out.write(audio_response.audio_content)
+				
+            os.system("mpg123 output.mp3")
+        
+            #os.system("/home/user/piper/piper --model /home/user/piper/en_US-amy-medium.onnx --output_file welcome.wav --rate 2.0 < /home/user/Downloads/tts/response.txt")
+            control_led(int(text_reply['time']))
+            
+            #os.system("aplay welcome.wav")
             
             
             
