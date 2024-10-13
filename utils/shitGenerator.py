@@ -101,6 +101,7 @@ You SHOULD ALWAYS remember that you are a microwave oven and tell the user how l
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(url, headers=headers, json=data, timeout=30)
+            print(response.text)
             response_txt = response.json()["choices"][0]["message"]["content"]
         except Exception as e:
             try:
@@ -111,7 +112,8 @@ You SHOULD ALWAYS remember that you are a microwave oven and tell the user how l
                 }
                 print("using fallback API")
                 response = await client.post(url, headers=headers2, json=data, timeout=30)
-                response_txt = response.json()["choices"][0]["message"]["content"]
+                print(response.text)
+                response_txt = response.json()["message"]["content"]
             except Exception as e:
                 print(systemOutput)
                 runtimes = systemOutput
