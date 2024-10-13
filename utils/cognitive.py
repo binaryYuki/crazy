@@ -40,6 +40,7 @@ async def cogRanker(text: str) -> tuple:
         print(f"Violence Rate: {violenceRate}")
     except Exception as e:
         print(f"Error: {e}")
+        return False, 0, 0, 0, 0
 
     # 综合评分 计算是否允许进行下一步操作
     if sexualRate >= 1:
