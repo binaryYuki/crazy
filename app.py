@@ -82,12 +82,15 @@ async def response(request: Request):
         print(f"Rank: {rank}", f"Bonus: {bonus}")
         rank += (bonus / 10) * 3
         responseText = await get_openai_response(data, str((rank * 10).__round__()))
-
+        if rank != 0:
+            rank = (rank * 10).__round__() + 3
+        else:
+            rank = 0
         return JSONResponse(
             content={
                 "success": True,
                 "run": True,
-                "time": str(((rank * 10).__round__() + 3) if rank != 0 else 0),
+                "time": str(rank),
                 "response": responseText
             })
 
