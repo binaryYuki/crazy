@@ -65,26 +65,23 @@ async def response(request: Request):
         data = await request.json()
     except Exception as e:
         return JSONResponse(
-            content={"success": False, "response": "What the hell are u talking about?"})
+            content={"success": False, "response": "What the hell are u talking about?", "time": "0", "run": False})
     try:
         data = data["text"]
         print(f"Data: {data}")
     except Exception as e:
         return JSONResponse(
-            content={"success": False, "response": "What the hell are u talking about?"})
+            content={"success": False, "response": "What the hell are u talking about?", "time": "0", "run": False})
 
     result, bonus = await cogRanker(data)
     if not result:
         return JSONResponse(
             content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
     else:
-        rank_future = analyze_text_async(data)
-        response_future = get_openai_response(data)
-
-        rank, responseText = await asyncio.gather(rank_future, response_future)
-
+        rank = await analyze_text_async(data)
         print(f"Rank: {rank}", f"Bonus: {bonus}")
         rank += (bonus / 10) * 3
+        responseText = await get_openai_response(data, str((rank * 10).__round__()))
 
         return JSONResponse(
             content={
