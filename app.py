@@ -76,7 +76,7 @@ async def response(request: Request):
     result, bonus = await cogRanker(data)
     if not result:
         return JSONResponse(
-            content={"success": True, "run": False, "time": str(0), "voiceID": uuid4().hex})
+            content={"success": True, "run": False, "time": str(0), "response": "What the hell are u talking about?"})
     else:
         rank = await analyze_text_async(data)
         print(f"Rank: {rank}", f"Bonus: {bonus}")
