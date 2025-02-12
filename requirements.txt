@@ -36,7 +36,7 @@ sympy==1.13.3
 tokenizers==0.20.1
 torch==2.4.1
 tqdm==4.66.5
-transformers==4.45.2
+transformers==4.48.0
 typing-extensions==4.12.2
 urllib3==2.2.3
 uvicorn==0.31.1
